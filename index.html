@@ -24,7 +24,6 @@
 <div id="loginScreen" class="container">
   <div class="card p-4 shadow login-box text-center">
     <div class="mb-3">
-      <!-- School Logo (Login) -->
       <img src="logo.png" alt="School Logo" class="login-logo mb-2" onerror="this.style.display='none'">
       <div class="school-header-title">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
       <div class="text-muted small">School ID: 136496</div>
@@ -40,14 +39,12 @@
   </div>
 </div>
 
-<!-- MAIN SYSTEM APP (HIDDEN UNTIL AUTHENTICATED) -->
+<!-- MAIN SYSTEM APP -->
 <div id="mainApp" class="container my-3 d-none">
   
-  <!-- SCHOOL HEADER BANNER WITH LOGO -->
   <div class="card p-3 mb-3 bg-white shadow-sm">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div class="d-flex align-items-center gap-3">
-        <!-- School Logo (Banner) -->
         <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.style.display='none'">
         <div>
           <div class="school-header-title">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
@@ -59,7 +56,6 @@
     </div>
   </div>
   
-  <!-- TAB NAVIGATION -->
   <ul class="nav nav-pills nav-justified mb-3" id="mainTabs">
     <li class="nav-item">
       <button class="nav-link active" onclick="showTab('scanner', this)">📷 Auto QR Scanner</button>
@@ -171,7 +167,7 @@
     </div>
   </div>
 
-  <!-- TAB 3: ADMIN DASHBOARD WITH FILTERS -->
+  <!-- TAB 3: ADMIN DASHBOARD -->
   <div id="tab-dashboard" class="tab-content d-none">
     <div class="card p-3 mb-3 bg-white">
       <h6 class="fw-bold mb-2 text-primary">🔍 Project FoodTrace Dashboard Filters</h6>
@@ -225,7 +221,7 @@
   var currentPupilId = null;
   var nutChart, attChart;
 
-  // Local Date Helper (Prevents UTC timezone shifts)
+  // Local Date Helper (Outputs YYYY-MM-DD matching local time)
   function getLocalTodayDate() {
     var d = new Date();
     var month = '' + (d.getMonth() + 1);
@@ -234,6 +230,16 @@
     if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
     return [year, month, day].join('-');
+  }
+
+  // Format YYYY-MM-DD to Display MM/DD/YYYY
+  function formatDisplayDate(ymdStr) {
+    if (!ymdStr || ymdStr.length < 10) return ymdStr;
+    var parts = ymdStr.split('-');
+    if (parts.length === 3) {
+      return parts[1] + '/' + parts[2] + '/' + parts[0];
+    }
+    return ymdStr;
   }
 
   async function apiCall(action, data = {}) {
@@ -390,7 +396,7 @@
       document.getElementById('dashAbsentToday').innerText = data.attendanceCounts["Absent"];
 
       var isToday = (startDate === today && endDate === today);
-      var dateLabel = isToday ? "Today" : (startDate === endDate ? startDate : startDate + " to " + endDate);
+      var dateLabel = isToday ? "Today" : (startDate === endDate ? formatDisplayDate(startDate) : formatDisplayDate(startDate) + " to " + formatDisplayDate(endDate));
       
       document.getElementById('dashServedLabel').innerText = "Served (/) (" + dateLabel + ")";
       document.getElementById('dashAbsentLabel').innerText = "Absent (A) (" + dateLabel + ")";
