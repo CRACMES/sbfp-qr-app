@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SBFP Automated QR Attendance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #f4f6f9; font-family: system-ui, -apple-system, sans-serif; }
+    .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    #reader { width: 100%; max-width: 500px; margin: auto; border-radius: 8px; overflow: hidden; min-height: 250px; }
+    .status-btn { height: 60px; font-size: 1.1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="container my-3">
+  <h3 class="text-center fw-bold text-primary mb-3">SBFP QR Monitoring System</h3>
+  
+  <ul class="nav nav-pills nav-justified mb-3" id="mainTabs">
+    <li class="nav-item">
+      <button class="nav-link active" onclick="showTab('scanner', this)">📷 Auto QR Scanner</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="showTab('addPupil', this)">➕ Add Pupil</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="showTab('dashboard', this); loadDashboard();">📊 Admin Dashboard</button>
+    </li>
+  </ul>
+
+  <!-- TAB 1: AUTOMATED QR SCANNER -->
+  <div id="tab-scanner" class="tab-content">
+    <div class="card p-3 text-center">
+      <h5 class="card-title fw-bold mb-3">Live Camera Scanning</h5>
+      <div id="reader"></div>
+
+      <div id="scanResult" class="mt-3 d-none">
+        <div class="alert alert-info text-start">
+          <strong id="pName">---</strong> (<span id="pGrade">---</span>)<br>
+          <small>ID: <span id="pId">---</span> | Nut. Status: <span id="pStatus">---</span></small>
+        </div>
+        
+        <h6>Select Actual Feeding Status:</h6>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+          <button class="btn btn-success flex-fill status-btn" onclick="submitAttendance('/')">(/) Present / Served</button>
+          <button class="btn btn-danger flex-fill status-btn" onclick="submitAttendance('A')">(A) Absent</button>
+          <button class="btn btn-warning flex-fill status-btn" onclick="submitAttendance('//')">(//) Served Twice</button>
+        </div>
+      </div>
+      <div id="scanStatusMsg" class="mt-2 fw-bold text-success"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: ADD BENEFICIARY -->
+  <div id="tab-addPupil" class="tab-content d-none">
+    <div class="card p-4">
+      <h5 class="card-title fw-bold mb-3">Add Beneficiary Info (SBFP Form 4)</h5>
+      <form id="beneficiaryForm">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Name of Pupil</label>
+          <input type="text" class="form-control" name="name" placeholder="Last Name, First Name, M.I." required>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Grade Level</label>
+            <select class="form-select" name="grade" required>
+              <option value="Kindergarten">Kindergarten</option>
+              <option value="Grade 1">Grade 1</option>
+              <option value="Grade 2">Grade 2</option>
+              <option value="Grade 3">Grade 3</option>
+              <option value="Grade 4">Grade 4</option>
+              <option value="Grade 5">Grade 5</option>
+              <option value="Grade 6">Grade 6</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label fw-bold">4Ps Beneficiary?</label>
+            <div>
+              <input class="form-check-input" type="radio" name="fourPs" value="Y" required> Y
+              <input class="form-check-input ms-2" type="radio" name="fourPs" value="N" checked> N
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label fw-bold">Previous SBFP?</label>
+            <div>
+              <input class="form-check-input" type="radio" name="prevSBFP" value="Y" required> Y
+              <input class="form-check-input ms-2" type="radio" name="prevSBFP" value="N" checked> N
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3 mb-3"><label>Age</label><input type="number" class="form-control" name="age" required></div>
+          <div class="col-md-3 mb-3"><label>Birthdate</label><input type="date" class="form-control" name="birthdate" required></div>
+          <div class="col-md-3 mb-3"><label>Sex</label><select class="form-select" name="sex"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          <div class="col-md-3 mb-3">
+            <label>Nutritional Status</label>
+            <select class="form-select" name="nutritionalStatus" required>
+              <option value="N">(N) Normal</option>
+              <option value="UW/SUW">(UW/SUW) Underweight</option>
+              <option value="OW/OB">(OW/OB) Overweight</option>
+              <option value="S/SS">(S/SS) Stunted</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3 mb-3"><label>Height (cm)</label><input type="number" step="0.1" class="form-control" name="height" required></div>
+          <div class="col-md-3 mb-3"><label>Weight (kg)</label><input type="number" step="0.1" class="form-control" name="weight" required></div>
+          <div class="col-md-6 mb-3"><label>Pre-Feeding Date</label><input type="date" class="form-control" name="preFeedingDate" required></div>
+        </div>
+
+        <hr>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="fw-bold">Deworming Status</label><br>
+            <input class="form-check-input" type="radio" name="dewormingStatus" value="/" checked> (/) Dewormed
+            <input class="form-check-input ms-2" type="radio" name="dewormingStatus" value="X"> (X) Not Dewormed
+          </div>
+          <div class="col-md-6 mb-3"><label class="fw-bold">Deworming Date</label><input type="date" class="form-control" name="dewormingDate" required></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-2">Save Beneficiary</button>
+      </form>
+      <div id="addFormMsg" class="mt-3"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: DASHBOARD -->
+  <div id="tab-dashboard" class="tab-content d-none">
+    <div class="row mb-3 text-white text-center">
+      <div class="col-md-4 mb-2"><div class="card p-3 bg-primary"><h6>Total Beneficiaries</h6><h2 id="dashTotalBen">0</h2></div></div>
+      <div class="col-md-4 mb-2"><div class="card p-3 bg-success"><h6>Served Today (/)</h6><h2 id="dashServedToday">0</h2></div></div>
+      <div class="col-md-4 mb-2"><div class="card p-3 bg-danger"><h6>Absent Today (A)</h6><h2 id="dashAbsentToday">0</h2></div></div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3"><div class="card p-3"><h6 class="fw-bold">Nutritional Status</h6><canvas id="chartNutritional"></canvas></div></div>
+      <div class="col-md-6 mb-3"><div class="card p-3"><h6 class="fw-bold">Today's Attendance</h6><canvas id="chartAttendance"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // INSERT YOUR DEPLOYED APPS SCRIPT WEB APP URL BELOW:
+  const API_URL = "https://script.google.com/macros/s/AKfycbziJc-ciG391QT4osYIGWEWroT46tx8G6GLAXCjbHbSMgh70420ER9I7FWTUa5pVXaHOg/exec";
+
+  var html5QrCode = null;
+  var currentPupilId = null;
+  var nutChart, attChart;
+
+  async function apiCall(action, data = {}) {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: action, data: data })
+      });
+      return await response.json();
+    } catch (err) {
+      console.error(err);
+      return { success: false, message: "Network connection error" };
+    }
+  }
+
+  function showTab(tabName, element) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('d-none'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.remove('d-none');
+    if (element) element.classList.add('active');
+
+    if (tabName === 'scanner') startScanner();
+    else stopScanner();
+  }
+
+  function startScanner() {
+    if (html5QrCode) return;
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 15, qrbox: { width: 250, height: 250 } },
+      onScanSuccess
+    ).catch(err => {
+      document.getElementById('scanStatusMsg').innerText = "Camera Access Blocked or Not Supported.";
+    });
+  }
+
+  function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => { html5QrCode = null; });
+    }
+  }
+
+  function onScanSuccess(decodedText) {
+    if (currentPupilId === decodedText.trim()) return; 
+    currentPupilId = decodedText.trim();
+    document.getElementById('scanStatusMsg').innerText = "Querying Pupil Info...";
+
+    apiCall("getPupilByQR", { pupilId: currentPupilId }).then(res => {
+      if (res.success) {
+        document.getElementById('pName').innerText = res.pupil.name;
+        document.getElementById('pGrade').innerText = res.pupil.grade;
+        document.getElementById('pId').innerText = res.pupil.id;
+        document.getElementById('pStatus').innerText = res.pupil.nutritionalStatus;
+        document.getElementById('scanResult').classList.remove('d-none');
+        document.getElementById('scanStatusMsg').innerText = "";
+      } else {
+        document.getElementById('scanStatusMsg').innerText = res.message;
+        document.getElementById('scanResult').classList.add('d-none');
+      }
+    });
+  }
+
+  function submitAttendance(status) {
+    if (!currentPupilId) return;
+    document.getElementById('scanStatusMsg').innerText = "Saving attendance...";
+    
+    apiCall("recordAttendance", { pupilId: currentPupilId, status: status }).then(res => {
+      if (res.success) {
+        document.getElementById('scanStatusMsg').innerText = "✓ Updated " + res.name + " as (" + status + ")";
+        document.getElementById('scanResult').classList.add('d-none');
+        currentPupilId = null;
+      }
+    });
+  }
+
+  document.getElementById('beneficiaryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var formData = {};
+    new FormData(this).forEach((val, key) => formData[key] = val);
+    
+    document.getElementById('addFormMsg').innerText = "Saving pupil...";
+    apiCall("addBeneficiary", { formData: formData }).then(res => {
+      if (res.success) {
+        document.getElementById('addFormMsg').innerHTML = `<div class="alert alert-success">✓ Pupil Added! ID: <strong>${res.pupilId}</strong></div>`;
+        document.getElementById('beneficiaryForm').reset();
+      }
+    });
+  });
+
+  function loadDashboard() {
+    apiCall("getDashboardData").then(data => {
+      document.getElementById('dashTotalBen').innerText = data.totalBeneficiaries;
+      document.getElementById('dashServedToday').innerText = data.todayAttendance["Present"];
+      document.getElementById('dashAbsentToday').innerText = data.todayAttendance["Absent"];
+
+      if (nutChart) nutChart.destroy();
+      nutChart = new Chart(document.getElementById('chartNutritional'), {
+        type: 'pie',
+        data: {
+          labels: ['Normal', 'Underweight', 'Overweight', 'Stunted'],
+          datasets: [{ data: [data.nutritionalStatus["N"], data.nutritionalStatus["UW/SUW"], data.nutritionalStatus["OW/OB"], data.nutritionalStatus["S/SS"]], backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d'] }]
+        }
+      });
+
+      if (attChart) attChart.destroy();
+      attChart = new Chart(document.getElementById('chartAttendance'), {
+        type: 'bar',
+        data: {
+          labels: ['(/) Present', '(A) Absent', '(//) Served Twice'],
+          datasets: [{ label: 'Count', data: [data.todayAttendance["Present"], data.todayAttendance["Absent"], data.todayAttendance["Served Twice"]], backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'] }]
+        },
+        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+    });
+  }
+
+  window.onload = function() { startScanner(); };
+</script>
+</body>
+</html>
