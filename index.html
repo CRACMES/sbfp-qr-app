@@ -218,13 +218,23 @@
 </div>
 
 <script>
-  // REPLACE WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
   const API_URL = "https://script.google.com/macros/s/AKfycbziJc-ciG391QT4osYIGWEWroT46tx8G6GLAXCjbHbSMgh70420ER9I7FWTUa5pVXaHOg/exec";
 
   var userPin = sessionStorage.getItem("sbfp_user_pin") || "";
   var html5QrCode = null;
   var currentPupilId = null;
   var nutChart, attChart;
+
+  // Local Date Helper (Prevents UTC timezone shifts)
+  function getLocalTodayDate() {
+    var d = new Date();
+    var month = '' + (d.getMonth() + 1);
+    var day = '' + d.getDate();
+    var year = d.getFullYear();
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    return [year, month, day].join('-');
+  }
 
   async function apiCall(action, data = {}) {
     try {
@@ -348,7 +358,7 @@
   });
 
   function resetFilters() {
-    var today = new Date().toISOString().split('T')[0];
+    var today = getLocalTodayDate();
     document.getElementById('dashGradeFilter').value = "All";
     document.getElementById('dashStartDate').value = today;
     document.getElementById('dashEndDate').value = today;
@@ -360,7 +370,7 @@
     var startDate = document.getElementById('dashStartDate').value;
     var endDate = document.getElementById('dashEndDate').value;
 
-    var today = new Date().toISOString().split('T')[0];
+    var today = getLocalTodayDate();
     if (!startDate) {
       startDate = today;
       document.getElementById('dashStartDate').value = today;
@@ -371,8 +381,8 @@
     }
 
     apiCall("getDashboardData", { grade: grade, startDate: startDate, endDate: endDate }).then(data => {
-      if (!data.success && data.message) {
-        alert(data.message);
+      if (!data || !data.success) {
+        if (data && data.message) alert(data.message);
         return;
       }
       document.getElementById('dashTotalBen').innerText = data.totalBeneficiaries;
@@ -408,6 +418,9 @@
   }
 
   window.onload = function() {
+    var today = getLocalTodayDate();
+    document.getElementById('dashStartDate').value = today;
+    document.getElementById('dashEndDate').value = today;
     if (userPin) {
       attemptLogin();
     }
