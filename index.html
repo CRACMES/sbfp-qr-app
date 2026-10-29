@@ -220,7 +220,7 @@
 
     <div class="row mb-3 text-white text-center">
       <div class="col-md-4 mb-2"><div class="card p-3 bg-primary"><h6>Total Beneficiaries</h6><h2 id="dashTotalBen">0</h2></div></div>
-      <div class="col-md-4 mb-2"><div class="card p-3 bg-success"><h6 id="dashServedLabel">Served (/)</h6><h2 id="dashServedToday">0</h2></div></div>
+      <div class="col-md-4 mb-2"><div class="card p-3 bg-success"><h6 id="dashServedLabel">Total Served</h6><h2 id="dashServedToday">0</h2></div></div>
       <div class="col-md-4 mb-2"><div class="card p-3 bg-danger"><h6 id="dashAbsentLabel">Absent (A)</h6><h2 id="dashAbsentToday">0</h2></div></div>
     </div>
 
@@ -240,7 +240,6 @@
   var currentPupilId = null;
   var nutChart, attChart;
 
-  // Toggle function for N/A date fields
   function toggleDateInput(inputId, isNA) {
     var input = document.getElementById(inputId);
     if (isNA) {
@@ -253,7 +252,6 @@
     }
   }
 
-  // Local Date Helper
   function getLocalTodayDate() {
     var d = new Date();
     var month = '' + (d.getMonth() + 1);
@@ -264,7 +262,6 @@
     return [year, month, day].join('-');
   }
 
-  // Format YYYY-MM-DD to Display MM/DD/YYYY
   function formatDisplayDate(ymdStr) {
     if (!ymdStr || ymdStr.length < 10) return ymdStr;
     var parts = ymdStr.split('-');
@@ -421,7 +418,6 @@
     var formData = {};
     new FormData(this).forEach((val, key) => formData[key] = val);
     
-    // Check if N/A is toggled
     if (document.getElementById('noPreFeedingDate').checked || !formData.preFeedingDate) {
       formData.preFeedingDate = "N/A";
     }
@@ -469,13 +465,19 @@
         return;
       }
       document.getElementById('dashTotalBen').innerText = data.totalBeneficiaries;
-      document.getElementById('dashServedToday').innerText = data.attendanceCounts["Present"];
+      
+      // Compute total served as Present + Served Twice
+      var totalServedCount = (data.totalServed !== undefined) 
+        ? data.totalServed 
+        : ((data.attendanceCounts["Present"] || 0) + (data.attendanceCounts["Served Twice"] || 0));
+        
+      document.getElementById('dashServedToday').innerText = totalServedCount;
       document.getElementById('dashAbsentToday').innerText = data.attendanceCounts["Absent"];
 
       var isToday = (startDate === today && endDate === today);
       var dateLabel = isToday ? "Today" : (startDate === endDate ? formatDisplayDate(startDate) : formatDisplayDate(startDate) + " to " + formatDisplayDate(endDate));
       
-      document.getElementById('dashServedLabel').innerText = "Served (/) (" + dateLabel + ")";
+      document.getElementById('dashServedLabel').innerText = "Total Served (" + dateLabel + ")";
       document.getElementById('dashAbsentLabel').innerText = "Absent (A) (" + dateLabel + ")";
       document.getElementById('attendanceChartTitle').innerText = "Attendance Summary (" + dateLabel + ")";
 
