@@ -30,9 +30,9 @@
       <h5 class="fw-bold text-primary mt-2">Project FoodTrace QR-AMS</h5>
     </div>
     <hr>
-    <p class="text-muted small mb-3">🔒 Enter School Access PIN to Login</p>
+    <p class="text-muted small mb-3">🔒 Enter Access PIN (Teacher / Admin) to Login</p>
     <div class="mb-3">
-      <input type="password" id="inputPin" class="form-control form-control-lg text-center" placeholder="Enter PIN" maxlength="8">
+      <input type="password" id="inputPin" class="form-control form-control-lg text-center" placeholder="Enter Access PIN" maxlength="8">
     </div>
     <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="attemptLogin()">Unlock Application</button>
     <div id="loginErrorMsg" class="text-danger fw-bold mt-3"></div>
@@ -48,7 +48,7 @@
         <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.style.display='none'">
         <div>
           <div class="school-header-title">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
-          <div class="text-muted small">School ID - 136496</div>
+          <div class="text-muted small">School ID - 136496 <span id="userRoleBadge" class="badge bg-primary ms-2"></span></div>
           <h4 class="fw-bold text-primary mb-0 mt-1">Project FoodTrace QR-AMS</h4>
         </div>
       </div>
@@ -57,19 +57,19 @@
   </div>
   
   <ul class="nav nav-pills nav-justified mb-3" id="mainTabs">
-    <li class="nav-item">
-      <button class="nav-link active" onclick="showTab('scanner', this)">📷 Auto QR Scanner</button>
+    <li class="nav-item" id="nav-scanner">
+      <button class="nav-link" id="btn-tab-scanner" onclick="showTab('scanner', this)">📷 Auto QR Scanner</button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="showTab('addPupil', this)">➕ Add Pupil</button>
+    <li class="nav-item" id="nav-addPupil">
+      <button class="nav-link" id="btn-tab-addPupil" onclick="showTab('addPupil', this)">➕ Add Pupil</button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="showTab('dashboard', this); loadDashboard();">📊 Admin Dashboard</button>
+    <li class="nav-item" id="nav-dashboard">
+      <button class="nav-link" id="btn-tab-dashboard" onclick="showTab('dashboard', this); loadDashboard();">📊 Admin Dashboard</button>
     </li>
   </ul>
 
   <!-- TAB 1: AUTOMATED QR SCANNER -->
-  <div id="tab-scanner" class="tab-content">
+  <div id="tab-scanner" class="tab-content d-none">
     <div class="card p-3 text-center">
       <h5 class="card-title fw-bold mb-3">Live Camera Scanning</h5>
       <div id="reader"></div>
@@ -148,7 +148,16 @@
         <div class="row">
           <div class="col-md-3 mb-3"><label>Height (cm)</label><input type="number" step="0.1" class="form-control" name="height" required></div>
           <div class="col-md-3 mb-3"><label>Weight (kg)</label><input type="number" step="0.1" class="form-control" name="weight" required></div>
-          <div class="col-md-6 mb-3"><label>Pre-Feeding Date</label><input type="date" class="form-control" name="preFeedingDate" required></div>
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0 fw-bold">Pre-Feeding Date</label>
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="noPreFeedingDate" onchange="toggleDateInput('inputPreFeedingDate', this.checked)">
+                <label class="form-check-label small fw-bold text-secondary" for="noPreFeedingDate">N/A</label>
+              </div>
+            </div>
+            <input type="date" class="form-control" id="inputPreFeedingDate" name="preFeedingDate" required>
+          </div>
         </div>
 
         <hr>
@@ -158,10 +167,19 @@
             <input class="form-check-input" type="radio" name="dewormingStatus" value="/" checked> (/) Dewormed
             <input class="form-check-input ms-2" type="radio" name="dewormingStatus" value="X"> (X) Not Dewormed
           </div>
-          <div class="col-md-6 mb-3"><label class="fw-bold">Deworming Date</label><input type="date" class="form-control" name="dewormingDate" required></div>
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0 fw-bold">Deworming Date</label>
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="noDewormingDate" onchange="toggleDateInput('inputDewormingDate', this.checked)">
+                <label class="form-check-label small fw-bold text-secondary" for="noDewormingDate">N/A</label>
+              </div>
+            </div>
+            <input type="date" class="form-control" id="inputDewormingDate" name="dewormingDate" required>
+          </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mt-2">Save Beneficiary</button>
+        <button type="submit" class="btn btn-primary w-100 mt-2 fw-bold">Save Beneficiary</button>
       </form>
       <div id="addFormMsg" class="mt-3"></div>
     </div>
@@ -217,11 +235,25 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbziJc-ciG391QT4osYIGWEWroT46tx8G6GLAXCjbHbSMgh70420ER9I7FWTUa5pVXaHOg/exec";
 
   var userPin = sessionStorage.getItem("sbfp_user_pin") || "";
+  var userRole = sessionStorage.getItem("sbfp_user_role") || "";
   var html5QrCode = null;
   var currentPupilId = null;
   var nutChart, attChart;
 
-  // Local Date Helper (Outputs YYYY-MM-DD matching local time)
+  // Toggle function for N/A date fields
+  function toggleDateInput(inputId, isNA) {
+    var input = document.getElementById(inputId);
+    if (isNA) {
+      input.value = "";
+      input.disabled = true;
+      input.removeAttribute("required");
+    } else {
+      input.disabled = false;
+      input.setAttribute("required", "required");
+    }
+  }
+
+  // Local Date Helper
   function getLocalTodayDate() {
     var d = new Date();
     var month = '' + (d.getMonth() + 1);
@@ -266,22 +298,49 @@
 
     apiCall("verifyPin").then(res => {
       if (res.success) {
+        userRole = res.role;
         sessionStorage.setItem("sbfp_user_pin", userPin);
+        sessionStorage.setItem("sbfp_user_role", userRole);
+        
         document.getElementById('loginScreen').classList.add('d-none');
         document.getElementById('mainApp').classList.remove('d-none');
         document.getElementById('loginErrorMsg').innerText = "";
-        startScanner();
+        document.getElementById('userRoleBadge').innerText = "Role: " + userRole;
+
+        applyRolePermissions(userRole);
       } else {
         sessionStorage.removeItem("sbfp_user_pin");
+        sessionStorage.removeItem("sbfp_user_role");
         userPin = "";
+        userRole = "";
         document.getElementById('loginErrorMsg').innerText = "❌ Incorrect Access PIN!";
       }
     });
   }
 
+  function applyRolePermissions(role) {
+    const navScanner = document.getElementById('nav-scanner');
+    const navAddPupil = document.getElementById('nav-addPupil');
+    const navDashboard = document.getElementById('nav-dashboard');
+
+    if (role === "Teacher") {
+      navScanner.classList.remove('d-none');
+      navAddPupil.classList.add('d-none');
+      navDashboard.classList.add('d-none');
+      showTab('scanner', document.getElementById('btn-tab-scanner'));
+    } else if (role === "Admin") {
+      navScanner.classList.add('d-none');
+      navAddPupil.classList.remove('d-none');
+      navDashboard.classList.remove('d-none');
+      showTab('addPupil', document.getElementById('btn-tab-addPupil'));
+    }
+  }
+
   function logout() {
     sessionStorage.removeItem("sbfp_user_pin");
+    sessionStorage.removeItem("sbfp_user_role");
     userPin = "";
+    userRole = "";
     stopScanner();
     document.getElementById('mainApp').classList.add('d-none');
     document.getElementById('loginScreen').classList.remove('d-none');
@@ -349,16 +408,34 @@
     });
   }
 
+  function resetBeneficiaryForm() {
+    document.getElementById('beneficiaryForm').reset();
+    toggleDateInput('inputPreFeedingDate', false);
+    toggleDateInput('inputDewormingDate', false);
+    document.getElementById('noPreFeedingDate').checked = false;
+    document.getElementById('noDewormingDate').checked = false;
+  }
+
   document.getElementById('beneficiaryForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var formData = {};
     new FormData(this).forEach((val, key) => formData[key] = val);
     
+    // Check if N/A is toggled
+    if (document.getElementById('noPreFeedingDate').checked || !formData.preFeedingDate) {
+      formData.preFeedingDate = "N/A";
+    }
+    if (document.getElementById('noDewormingDate').checked || !formData.dewormingDate) {
+      formData.dewormingDate = "N/A";
+    }
+    
     document.getElementById('addFormMsg').innerText = "Saving pupil...";
     apiCall("addBeneficiary", { formData: formData }).then(res => {
       if (res.success) {
         document.getElementById('addFormMsg').innerHTML = `<div class="alert alert-success">✓ Pupil Added! ID: <strong>${res.pupilId}</strong></div>`;
-        document.getElementById('beneficiaryForm').reset();
+        resetBeneficiaryForm();
+      } else {
+        document.getElementById('addFormMsg').innerHTML = `<div class="alert alert-danger">❌ ${res.message}</div>`;
       }
     });
   });
