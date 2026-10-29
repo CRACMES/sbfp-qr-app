@@ -64,7 +64,7 @@
       <button class="nav-link" id="btn-tab-addPupil" onclick="showTab('addPupil', this)">➕ Add Pupil</button>
     </li>
     <li class="nav-item" id="nav-dashboard">
-      <button class="nav-link" id="btn-tab-dashboard" onclick="showTab('dashboard', this); loadDashboard();">📊 Admin Dashboard</button>
+      <button class="nav-link" id="btn-tab-dashboard" onclick="showTab('dashboard', this)">📊 Admin Dashboard</button>
     </li>
   </ul>
 
@@ -188,11 +188,14 @@
   <!-- TAB 3: ADMIN DASHBOARD -->
   <div id="tab-dashboard" class="tab-content d-none">
     <div class="card p-3 mb-3 bg-white">
-      <h6 class="fw-bold mb-2 text-primary">🔍 Project FoodTrace Dashboard Filters</h6>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0 text-primary">🔍 Project FoodTrace Dashboard Filters</h6>
+        <span class="badge bg-success small fw-normal">🔴 Live (Auto-refresh 5s)</span>
+      </div>
       <div class="row g-2 align-items-end">
         <div class="col-md-4">
           <label class="form-label small fw-bold">Grade Level</label>
-          <select id="dashGradeFilter" class="form-select form-select-sm">
+          <select id="dashGradeFilter" class="form-select form-select-sm" onchange="loadDashboard()">
             <option value="All">All Grade Levels</option>
             <option value="Kindergarten">Kindergarten</option>
             <option value="Grade 1">Grade 1</option>
@@ -205,11 +208,11 @@
         </div>
         <div class="col-md-3">
           <label class="form-label small fw-bold">Start Date</label>
-          <input type="date" id="dashStartDate" class="form-control form-control-sm">
+          <input type="date" id="dashStartDate" class="form-control form-control-sm" onchange="loadDashboard()">
         </div>
         <div class="col-md-3">
           <label class="form-label small fw-bold">End Date</label>
-          <input type="date" id="dashEndDate" class="form-control form-control-sm">
+          <input type="date" id="dashEndDate" class="form-control form-control-sm" onchange="loadDashboard()">
         </div>
         <div class="col-md-2 d-flex gap-1">
           <button class="btn btn-primary btn-sm flex-fill fw-bold" onclick="loadDashboard()">Apply</button>
@@ -239,6 +242,7 @@
   var html5QrCode = null;
   var currentPupilId = null;
   var nutChart, attChart;
+  var dashInterval = null;
 
   function toggleDateInput(inputId, isNA) {
     var input = document.getElementById(inputId);
@@ -339,6 +343,7 @@
     userPin = "";
     userRole = "";
     stopScanner();
+    stopDashboardAutoRefresh();
     document.getElementById('mainApp').classList.add('d-none');
     document.getElementById('loginScreen').classList.remove('d-none');
     document.getElementById('inputPin').value = "";
@@ -350,8 +355,29 @@
     document.getElementById('tab-' + tabName).classList.remove('d-none');
     if (element) element.classList.add('active');
 
-    if (tabName === 'scanner') startScanner();
-    else stopScanner();
+    if (tabName === 'scanner') {
+      startScanner();
+      stopDashboardAutoRefresh();
+    } else if (tabName === 'dashboard') {
+      stopScanner();
+      loadDashboard();
+      startDashboardAutoRefresh();
+    } else {
+      stopScanner();
+      stopDashboardAutoRefresh();
+    }
+  }
+
+  function startDashboardAutoRefresh() {
+    stopDashboardAutoRefresh();
+    dashInterval = setInterval(loadDashboard, 5000);
+  }
+
+  function stopDashboardAutoRefresh() {
+    if (dashInterval) {
+      clearInterval(dashInterval);
+      dashInterval = null;
+    }
   }
 
   function startScanner() {
@@ -466,7 +492,6 @@
       }
       document.getElementById('dashTotalBen').innerText = data.totalBeneficiaries;
       
-      // Compute total served as Present + Served Twice
       var totalServedCount = (data.totalServed !== undefined) 
         ? data.totalServed 
         : ((data.attendanceCounts["Present"] || 0) + (data.attendanceCounts["Served Twice"] || 0));
@@ -487,7 +512,8 @@
         data: {
           labels: ['Normal', 'Underweight', 'Overweight', 'Stunted'],
           datasets: [{ data: [data.nutritionalStatus["N"], data.nutritionalStatus["UW/SUW"], data.nutritionalStatus["OW/OB"], data.nutritionalStatus["S/SS"]], backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d'] }]
-        }
+        },
+        options: { animation: false }
       });
 
       if (attChart) attChart.destroy();
@@ -497,7 +523,7 @@
           labels: ['(/) Present', '(A) Absent', '(//) Served Twice'],
           datasets: [{ label: 'Pupil Count', data: [data.attendanceCounts["Present"], data.attendanceCounts["Absent"], data.attendanceCounts["Served Twice"]], backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'] }]
         },
-        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        options: { animation: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
       });
     });
   }
