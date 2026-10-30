@@ -85,10 +85,10 @@
     </li>
   </ul>
 
-  <!-- TAB 1: LIVE QR SCANNER (WITH BEEP & POP-UP) -->
+  <!-- TAB 1: LIVE QR SCANNER -->
   <div id="tab-scanner" class="tab-content d-none">
     <div class="card p-4 text-center">
-      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid id-card me-2"></i> Live Camera QR Scanner</h5>
+      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-id-card me-2"></i> Live Camera QR Scanner</h5>
       <p class="text-muted small">Position the pupil's QR code or LRN barcode in front of the camera.</p>
       <div id="reader"></div>
 
@@ -110,7 +110,7 @@
     </div>
   </div>
 
-  <!-- TAB 2: ADD LEARNER (WITH SUCCESS MODAL) -->
+  <!-- TAB 2: ADD LEARNER -->
   <div id="tab-addPupil" class="tab-content d-none">
     <div class="card p-4">
       <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-2"></i> Add Learner Masterlist Entry (DepEd SF8)</h5>
@@ -176,7 +176,7 @@
     </div>
   </div>
 
-  <!-- TAB 3: UPDATE LEARNER DATA & AUTO BMI -->
+  <!-- TAB 3: UPDATE LEARNER DATA -->
   <div id="tab-updatePupil" class="tab-content d-none">
     <div class="card p-4">
       <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-pen me-2"></i> Update Learner Nutritional Assessment</h5>
@@ -222,7 +222,7 @@
     </div>
   </div>
 
-  <!-- TAB 4: BMI & ATTENDANCE ANALYTICS (SECTION FILTER & POP-UP) -->
+  <!-- TAB 4: DASHBOARD & ANALYTICS -->
   <div id="tab-dashboard" class="tab-content d-none">
     <div class="card p-4 mb-4 bg-white">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -286,7 +286,7 @@
   </div>
 </div>
 
-<!-- UNIVERSAL NOTIFICATION MODAL (SUCCESS POP-UPS) -->
+<!-- UNIVERSAL NOTIFICATION MODAL -->
 <div class="modal fade" id="notificationModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content p-4 text-center">
@@ -302,7 +302,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+  // Paste your Google Apps Script Web App URL here
+  const API_URL = "https://script.google.com/macros/s/AKfycbzzptOLasIL2A-3D6DGK_Mr-PQF3i6mSwy8z3N6ml7ZuTeCtpbKzNnFL3nD2Ret3CIj/exec";
 
   var userPin = sessionStorage.getItem("sbfp_user_pin") || "";
   var userRole = sessionStorage.getItem("sbfp_user_role") || "";
@@ -367,16 +368,15 @@
 
   async function apiCall(action, data = {}) {
     try {
-      const payload = {
-        action: action,
-        pin: userPin,
-        data: JSON.stringify(data)
-      };
+      const payload = new URLSearchParams();
+      payload.append("action", action);
+      payload.append("pin", userPin);
+      payload.append("data", JSON.stringify(data));
 
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(payload)
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: payload
       });
       
       return await response.json();
@@ -396,7 +396,7 @@
     document.getElementById('loginErrorMsg').innerText = "Authenticating...";
 
     apiCall("verifyPin").then(res => {
-      if (res.success) {
+      if (res && res.success) {
         userRole = res.role;
         sessionStorage.setItem("sbfp_user_pin", userPin);
         sessionStorage.setItem("sbfp_user_role", userRole);
@@ -409,6 +409,8 @@
         userPin = "";
         document.getElementById('loginErrorMsg').innerText = "❌ Incorrect Access PIN!";
       }
+    }).catch(() => {
+      document.getElementById('loginErrorMsg').innerText = "❌ Connection error! Please check Web App URL.";
     });
   }
 
@@ -428,6 +430,7 @@
     document.getElementById('mainApp').classList.add('d-none');
     document.getElementById('loginScreen').classList.remove('d-none');
     document.getElementById('inputPin').value = "";
+    document.getElementById('loginErrorMsg').innerText = "";
   }
 
   function showTab(tabName, element) {
