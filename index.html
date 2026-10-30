@@ -3,254 +3,306 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project FoodTrace QR-AMS (SF8 DepEd Masterlist)</title>
+  <title>Home Grown School-Based Feeding Program (SF8)</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { background-color: #f4f6f9; font-family: system-ui, -apple-system, sans-serif; }
-    .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    #reader { width: 100%; max-width: 500px; margin: auto; border-radius: 8px; overflow: hidden; min-height: 250px; }
-    .status-btn { height: 55px; font-size: 1.05rem; font-weight: bold; }
-    .login-box { max-width: 450px; margin: 50px auto; }
-    .school-header-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
-    .school-logo { max-height: 70px; width: auto; object-fit: contain; }
+    :root {
+      --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      --accent-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      --bg-color: #f8fafc;
+    }
+    body { background-color: var(--bg-color); font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #1e293b; }
+    .card { border-radius: 16px; border: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); transition: transform 0.2s; }
+    .hero-banner { background: var(--primary-gradient); color: white; border-radius: 16px; }
+    #reader { width: 100%; max-width: 480px; margin: auto; border-radius: 12px; overflow: hidden; border: 3px solid #e2e8f0; }
+    .status-btn { height: 60px; font-size: 1.1rem; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .login-box { max-width: 420px; margin: 80px auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .school-header-title { font-size: 1.25rem; font-weight: 800; color: #1e293b; letter-spacing: -0.025em; }
+    .school-logo { max-height: 75px; width: auto; object-fit: contain; }
+    .nav-pills .nav-link { font-weight: 600; border-radius: 10px; color: #475569; transition: all 0.3s ease; padding: 12px 20px; }
+    .nav-pills .nav-link.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+    .modal-content { border-radius: 20px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
   </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN OVERLAY -->
+<!-- 1. SECURE LOGIN SCREEN -->
 <div id="loginScreen" class="container">
-  <div class="card p-4 shadow login-box text-center">
-    <div class="mb-3">
-      <img src="logo.png" alt="School Logo" class="school-logo mb-2" onerror="this.style.display='none'">
+  <div class="login-box text-center">
+    <div class="mb-4">
+      <img src="logo.png" alt="School Logo" class="school-logo mb-3" onerror="this.style.display='none'">
       <div class="school-header-title">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
-      <div class="text-muted small">School ID: 136496 | Division: Quezon City</div>
-      <h5 class="fw-bold text-primary mt-2">Project FoodTrace QR-AMS (DepEd SF8)</h5>
+      <div class="text-muted small mt-1">School ID: 136496 | Quezon City</div>
+      <h5 class="fw-bold text-primary mt-3">Home Grown School-Based Feeding Program</h5>
     </div>
-    <hr>
-    <p class="text-muted small mb-3">🔒 Enter Access PIN (Teacher: 1111 | Admin: 9999)</p>
+    <hr class="text-muted opacity-25">
+    <p class="text-muted small mb-3"><i class="fa-solid fa-lock me-1"></i> Enter Secure Access PIN to Proceed</p>
     <div class="mb-3">
-      <input type="password" id="inputPin" class="form-control form-control-lg text-center" placeholder="Enter Access PIN" maxlength="8">
+      <input type="password" id="inputPin" class="form-control form-control-lg text-center fw-bold" placeholder="••••" maxlength="8">
     </div>
-    <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="attemptLogin()">Unlock Application</button>
-    <div id="loginErrorMsg" class="text-danger fw-bold mt-3"></div>
+    <button class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm" style="border-radius: 12px;" onclick="attemptLogin()">Unlock Portal</button>
+    <div id="loginErrorMsg" class="text-danger fw-bold mt-3 small"></div>
   </div>
 </div>
 
 <!-- MAIN APPLICATION -->
-<div id="mainApp" class="container my-3 d-none">
+<div id="mainApp" class="container my-4 d-none">
   
-  <!-- SCHOOL HEADER -->
-  <div class="card p-3 mb-3 bg-white shadow-sm">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <!-- HEADER BANNER -->
+  <div class="card hero-banner p-4 mb-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
       <div class="d-flex align-items-center gap-3">
-        <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.style.display='none'">
+        <img src="logo.png" alt="School Logo" class="school-logo bg-white p-1 rounded-circle" onerror="this.style.display='none'">
         <div>
-          <div class="school-header-title">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
-          <div class="text-muted small">School ID: 136496 <span id="userRoleBadge" class="badge bg-primary ms-2"></span></div>
-          <h4 class="fw-bold text-primary mb-0 mt-1">Project FoodTrace QR-AMS & Nutritional Tracker</h4>
+          <div class="school-header-title text-white">Congressman Reynaldo A. Calalay Memorial Elementary School</div>
+          <div class="text-white-50 small">School ID: 136496 <span id="userRoleBadge" class="badge bg-light text-primary ms-2 px-2 py-1"></span></div>
+          <h4 class="fw-extrabold mb-0 mt-1 text-white"><i class="fa-solid fa-seedling me-2"></i> Home Grown School-Based Feeding Program</h4>
         </div>
       </div>
-      <button class="btn btn-outline-danger btn-sm fw-bold align-self-start" onclick="logout()">🔒 Logout</button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-light btn-sm fw-bold text-dark shadow-sm px-3" onclick="toggleFullScreen()"><i class="fa-solid fa-expand me-1"></i> Full Screen</button>
+        <button class="btn btn-outline-light btn-sm fw-bold px-3" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</button>
+      </div>
     </div>
   </div>
   
-  <!-- NAVIGATION TAB BARS -->
-  <ul class="nav nav-pills nav-justified mb-3" id="mainTabs">
+  <!-- NAVIGATION TABS -->
+  <ul class="nav nav-pills nav-justified mb-4 gap-2 bg-white p-2 rounded-4 shadow-sm" id="mainTabs">
     <li class="nav-item" id="nav-scanner">
-      <button class="nav-link" id="btn-tab-scanner" onclick="showTab('scanner', this)">📷 Auto QR Scanner</button>
+      <button class="nav-link" id="btn-tab-scanner" onclick="showTab('scanner', this)"><i class="fa-solid fa-camera me-2"></i> Live QR Scanner</button>
     </li>
     <li class="nav-item" id="nav-addPupil">
-      <button class="nav-link" id="btn-tab-addPupil" onclick="showTab('addPupil', this)">➕ Add SF8 Learner</button>
+      <button class="nav-link" id="btn-tab-addPupil" onclick="showTab('addPupil', this)"><i class="fa-solid fa-user-plus me-2"></i> Add Learner</button>
+    </li>
+    <li class="nav-item" id="nav-updatePupil">
+      <button class="nav-link" id="btn-tab-updatePupil" onclick="showTab('updatePupil', this)"><i class="fa-solid fa-user-pen me-2"></i> Update Learner</button>
     </li>
     <li class="nav-item" id="nav-dashboard">
-      <button class="nav-link" id="btn-tab-dashboard" onclick="showTab('dashboard', this)">📊 BMI & Attendance Analytics</button>
+      <button class="nav-link" id="btn-tab-dashboard" onclick="showTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i> BMI & Analytics</button>
     </li>
   </ul>
 
-  <!-- TAB 1: AUTOMATED QR SCANNER -->
+  <!-- TAB 1: LIVE QR SCANNER (WITH BEEP & POP-UP) -->
   <div id="tab-scanner" class="tab-content d-none">
-    <div class="card p-3 text-center">
-      <h5 class="card-title fw-bold mb-3">Live Camera QR Scanner</h5>
+    <div class="card p-4 text-center">
+      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid id-card me-2"></i> Live Camera QR Scanner</h5>
+      <p class="text-muted small">Position the pupil's QR code or LRN barcode in front of the camera.</p>
       <div id="reader"></div>
 
-      <div id="scanResult" class="mt-3 d-none">
-        <div class="alert alert-info text-start">
-          <strong id="pName">---</strong> (<span id="pGrade">---</span> - <span id="pSection">---</span>)<br>
-          <small>ID/LRN: <span id="pId">---</span> | Baseline BMI: <span id="pStatus">---</span></small>
+      <div id="scanResult" class="mt-4 d-none">
+        <div class="alert alert-success border-0 shadow-sm text-start p-3" style="border-radius: 12px;">
+          <h5 class="fw-bold text-success mb-1"><i class="fa-solid fa-circle-check me-2"></i> Pupil Recognized!</h5>
+          <strong id="pName" class="fs-5">---</strong> (<span id="pGrade">---</span> - <span id="pSection">---</span>)<br>
+          <small class="text-muted">ID/LRN: <span id="pId">---</span> | Baseline BMI: <span id="pStatus" class="fw-bold">---</span></small>
         </div>
         
-        <h6>Select Feeding Status:</h6>
+        <h6 class="fw-bold mt-3 mb-2">Select Feeding Attendance Status:</h6>
         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-          <button class="btn btn-success flex-fill status-btn" onclick="submitAttendance('/')">(/) Served / Present</button>
-          <button class="btn btn-danger flex-fill status-btn" onclick="submitAttendance('A')">(A) Absent</button>
-          <button class="btn btn-warning flex-fill status-btn" onclick="submitAttendance('//')">(//) Served Twice</button>
+          <button class="btn btn-success flex-fill status-btn" onclick="submitAttendance('/')"><i class="fa-solid fa-check me-1"></i> (/) Served / Present</button>
+          <button class="btn btn-danger flex-fill status-btn" onclick="submitAttendance('A')"><i class="fa-solid fa-xmark me-1"></i> (A) Absent</button>
+          <button class="btn btn-warning flex-fill status-btn text-dark" onclick="submitAttendance('//')"><i class="fa-solid fa-rotate me-1"></i> (//) Served Twice</button>
         </div>
       </div>
-      <div id="scanStatusMsg" class="mt-2 fw-bold text-success"></div>
+      <div id="scanStatusMsg" class="mt-3 fw-bold text-primary"></div>
     </div>
   </div>
 
-  <!-- TAB 2: EXPANDED SF8 BENEFICIARY REGISTRATION -->
+  <!-- TAB 2: ADD LEARNER (WITH SUCCESS MODAL) -->
   <div id="tab-addPupil" class="tab-content d-none">
     <div class="card p-4">
-      <h5 class="card-title fw-bold mb-3">Add Learner Masterlist Entry (DepEd SF8)</h5>
+      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-2"></i> Add Learner Masterlist Entry (DepEd SF8)</h5>
       <form id="beneficiaryForm">
         <div class="row">
           <div class="col-md-4 mb-3">
-            <label class="form-label fw-bold">LRN (12 Digits)</label>
+            <label class="form-label fw-bold small">LRN (12 Digits)</label>
             <input type="text" class="form-control" name="lrn" placeholder="e.g. 136496240001" required>
           </div>
           <div class="col-md-8 mb-3">
-            <label class="form-label fw-bold">Learner Name</label>
+            <label class="form-label fw-bold small">Learner Name</label>
             <input type="text" class="form-control" name="name" placeholder="SURNAME, FIRST NAME, M.I." required>
           </div>
         </div>
-
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">Complete Address</label>
+            <label class="form-label fw-bold small">Complete Address</label>
             <input type="text" class="form-control" name="address" placeholder="House No., Street, Barangay" required>
           </div>
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">QC Resident?</label>
+            <label class="form-label fw-bold small">QC Resident?</label>
             <select class="form-select" name="qcResident"><option value="YES">YES</option><option value="NO">NO</option></select>
           </div>
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">Sex</label>
+            <label class="form-label fw-bold small">Sex</label>
             <select class="form-select" name="sex"><option value="MALE">MALE</option><option value="FEMALE">FEMALE</option></select>
           </div>
         </div>
-
         <div class="row">
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">Grade Level</label>
+            <label class="form-label fw-bold small">Grade Level</label>
             <select class="form-select" name="grade" required>
-              <option value="Kindergarten">Kindergarten</option>
-              <option value="Grade 1">Grade 1</option>
-              <option value="Grade 2">Grade 2</option>
-              <option value="Grade 3">Grade 3</option>
-              <option value="Grade 4">Grade 4</option>
-              <option value="Grade 5">Grade 5</option>
-              <option value="Grade 6">Grade 6</option>
+              <option value="Kindergarten">Kindergarten</option><option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option><option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option><option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
             </select>
           </div>
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">Section</label>
+            <label class="form-label fw-bold small">Section</label>
             <input type="text" class="form-control" name="section" placeholder="e.g. Magiliw" required>
           </div>
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">Birthdate</label>
+            <label class="form-label fw-bold small">Birthdate</label>
             <input type="date" class="form-control" name="birthdate" required>
           </div>
           <div class="col-md-3 mb-3">
-            <label class="form-label fw-bold">Dewormed?</label>
+            <label class="form-label fw-bold small">Dewormed?</label>
             <select class="form-select" name="dewormed"><option value="YES">YES</option><option value="NO">NO</option></select>
           </div>
         </div>
-
+        <h6 class="fw-bold text-primary mt-3"><i class="fa-solid fa-weight-scale me-2"></i> Baseline Nutritional Measurement</h6>
+        <hr class="mt-1 mb-3">
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">4Ps Beneficiary?</label><br>
-            <input class="form-check-input" type="radio" name="fourPs" value="Y" required> Yes
-            <input class="form-check-input ms-3" type="radio" name="fourPs" value="N" checked> No
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">Previous SBFP Beneficiary?</label><br>
-            <input class="form-check-input" type="radio" name="prevSBFP" value="Y" required> Yes
-            <input class="form-check-input ms-3" type="radio" name="prevSBFP" value="N" checked> No
-          </div>
-        </div>
-
-        <h6 class="fw-bold text-primary mt-2">Baseline Nutritional Measurement</h6>
-        <hr class="mt-1">
-        <div class="row">
-          <div class="col-md-3 mb-3"><label>Weighing Date</label><input type="date" class="form-control" name="baseDate" required></div>
-          <div class="col-md-2 mb-3"><label>Age (Yrs/Mos)</label><input type="text" class="form-control" name="baseAge" placeholder="7.2" required></div>
-          <div class="col-md-2 mb-3"><label>Weight (kg)</label><input type="number" step="0.1" class="form-control" name="baseWeight" required></div>
-          <div class="col-md-2 mb-3"><label>Height (m)</label><input type="number" step="0.01" class="form-control" name="baseHeight" required></div>
+          <div class="col-md-3 mb-3"><label class="small fw-bold">Weighing Date</label><input type="date" class="form-control" name="baseDate" required></div>
+          <div class="col-md-2 mb-3"><label class="small fw-bold">Age (Yrs/Mos)</label><input type="text" class="form-control" name="baseAge" placeholder="7.2" required></div>
+          <div class="col-md-2 mb-3"><label class="small fw-bold">Weight (kg)</label><input type="number" step="0.1" class="form-control" id="addWeight" name="baseWeight" oninput="autoComputeBMI('addWeight', 'addHeight', 'addBMI')" required></div>
+          <div class="col-md-2 mb-3"><label class="small fw-bold">Height (m)</label><input type="number" step="0.01" class="form-control" id="addHeight" name="baseHeight" oninput="autoComputeBMI('addWeight', 'addHeight', 'addBMI')" required></div>
           <div class="col-md-3 mb-3">
-            <label>BMI Status</label>
-            <select class="form-select" name="baseBMI" required>
-              <option value="Normal">Normal</option>
-              <option value="Severely Wasted">Severely Wasted</option>
-              <option value="Wasted">Wasted</option>
-              <option value="Overweight">Overweight</option>
-              <option value="Obese">Obese</option>
-            </select>
+            <label class="small fw-bold text-success">Auto BMI Status</label>
+            <input type="text" class="form-control fw-bold text-success bg-light" id="addBMI" name="baseBMI" value="Normal" readonly required>
           </div>
         </div>
-
-        <button type="submit" class="btn btn-primary w-100 mt-2 fw-bold">Save Learner Masterlist Entry</button>
+        <button type="submit" class="btn btn-primary w-100 mt-3 fw-bold py-3" style="border-radius: 12px;"><i class="fa-solid fa-floppy-disk me-2"></i> Save Learner Masterlist Entry</button>
       </form>
-      <div id="addFormMsg" class="mt-3"></div>
     </div>
   </div>
 
-  <!-- TAB 3: ANALYTICS & BMI PROGRESSION CHARTS -->
-  <div id="tab-dashboard" class="tab-content d-none">
-    <div class="card p-3 mb-3 bg-white">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="fw-bold mb-0 text-primary">🔍 Dashboard Filters</h6>
-        <span class="badge bg-success small fw-normal">🔴 Live Syncing</span>
-      </div>
-      <div class="row g-2 align-items-end">
+  <!-- TAB 3: UPDATE LEARNER DATA & AUTO BMI -->
+  <div id="tab-updatePupil" class="tab-content d-none">
+    <div class="card p-4">
+      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-pen me-2"></i> Update Learner Nutritional Assessment</h5>
+      <p class="text-muted small">Search learner by LRN or ID, select assessment period, and update metrics with automated BMI computation.</p>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-md-8">
+          <label class="form-label fw-bold small">Search Learner (LRN or Pupil ID)</label>
+          <div class="input-group">
+            <input type="text" id="updateSearchId" class="form-control" placeholder="Enter LRN or SBFP ID...">
+            <button class="btn btn-primary fw-bold" onclick="fetchLearnerForUpdate()"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+          </div>
+        </div>
         <div class="col-md-4">
+          <label class="form-label fw-bold small">Assessment Period</label>
+          <select id="updatePeriod" class="form-select">
+            <option value="Baseline">Baseline</option>
+            <option value="Midline">Midline</option>
+            <option value="Endline">Endline</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="updateFormContainer" class="d-none">
+        <div class="alert alert-info border-0 mb-3" style="border-radius: 12px;">
+          <strong>Learner: <span id="upNameDisp">---</span></strong> | Grade: <span id="upGradeDisp">---</span>
+        </div>
+        <form id="updateLearnerForm" onsubmit="submitUpdateLearner(event)">
+          <div class="row">
+            <div class="col-md-3 mb-3"><label class="small fw-bold">Date</label><input type="date" class="form-control" id="upDate" required></div>
+            <div class="col-md-2 mb-3"><label class="small fw-bold">Age (Yrs/Mos)</label><input type="text" class="form-control" id="upAge" required></div>
+            <div class="col-md-2 mb-3"><label class="small fw-bold">Weight (kg)</label><input type="number" step="0.1" class="form-control" id="upWeight" oninput="autoComputeBMI('upWeight', 'upHeight', 'upBMI')" required></div>
+            <div class="col-md-2 mb-3"><label class="small fw-bold">Height (m)</label><input type="number" step="0.01" class="form-control" id="upHeight" oninput="autoComputeBMI('upWeight', 'upHeight', 'upBMI')" required></div>
+            <div class="col-md-3 mb-3">
+              <label class="small fw-bold text-success">Automated BMI Status</label>
+              <input type="text" class="form-control fw-bold text-success bg-light" id="upBMI" readonly required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success w-100 fw-bold py-3 mt-2 shadow-sm" style="border-radius: 12px;"><i class="fa-solid fa-cloud-arrow-up me-2"></i> Update Learner Assessment Data</button>
+        </form>
+      </div>
+      <div id="updateMsg" class="mt-3"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: BMI & ATTENDANCE ANALYTICS (SECTION FILTER & POP-UP) -->
+  <div id="tab-dashboard" class="tab-content d-none">
+    <div class="card p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-filter me-2"></i> Dashboard Filters & Analytics</h6>
+        <span class="badge bg-success small fw-normal px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-dot me-1"></i> Live Database Sync</span>
+      </div>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
           <label class="form-label small fw-bold">Grade Level</label>
-          <select id="dashGradeFilter" class="form-select form-select-sm" onchange="loadDashboard()">
+          <select id="dashGradeFilter" class="form-select form-select-sm">
             <option value="All">All Grade Levels</option>
-            <option value="Kindergarten">Kindergarten</option>
-            <option value="Grade 1">Grade 1</option>
-            <option value="Grade 2">Grade 2</option>
-            <option value="Grade 3">Grade 3</option>
-            <option value="Grade 4">Grade 4</option>
-            <option value="Grade 5">Grade 5</option>
-            <option value="Grade 6">Grade 6</option>
+            <option value="Kindergarten">Kindergarten</option><option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option><option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option><option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
           </select>
         </div>
         <div class="col-md-3">
-          <label class="form-label small fw-bold">Start Date</label>
-          <input type="date" id="dashStartDate" class="form-control form-control-sm" onchange="loadDashboard()">
+          <label class="form-label small fw-bold">Section</label>
+          <select id="dashSectionFilter" class="form-select form-select-sm">
+            <option value="All">All Sections</option>
+            <option value="Magiliw">Magiliw</option>
+            <option value="Sampaguita">Sampaguita</option>
+            <option value="Mabini">Mabini</option>
+          </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <label class="form-label small fw-bold">Start Date</label>
+          <input type="date" id="dashStartDate" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-2">
           <label class="form-label small fw-bold">End Date</label>
-          <input type="date" id="dashEndDate" class="form-control form-control-sm" onchange="loadDashboard()">
+          <input type="date" id="dashEndDate" class="form-control form-control-sm">
         </div>
         <div class="col-md-2 d-flex gap-1">
-          <button class="btn btn-primary btn-sm flex-fill fw-bold" onclick="loadDashboard()">Apply</button>
-          <button class="btn btn-outline-secondary btn-sm" onclick="resetFilters()">Reset</button>
+          <button class="btn btn-primary btn-sm flex-fill fw-bold shadow-sm" onclick="applyFiltersWithPopup()"><i class="fa-solid fa-check me-1"></i> Apply</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="resetFilters()"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
       </div>
     </div>
 
-    <!-- SUMMARY METRIC CARDS -->
-    <div class="row mb-3 text-white text-center">
-      <div class="col-md-4 mb-2"><div class="card p-3 bg-primary"><h6>Total Beneficiaries</h6><h2 id="dashTotalBen">0</h2></div></div>
-      <div class="col-md-4 mb-2"><div class="card p-3 bg-success"><h6 id="dashServedLabel">Total Served</h6><h2 id="dashServedToday">0</h2></div></div>
-      <div class="col-md-4 mb-2"><div class="card p-3 bg-danger"><h6 id="dashAbsentLabel">Absent (A)</h6><h2 id="dashAbsentToday">0</h2></div></div>
+    <!-- METRIC CARDS -->
+    <div class="row mb-4 text-white text-center">
+      <div class="col-md-4 mb-2"><div class="card p-4 bg-primary text-white shadow-sm"><h6>Total Beneficiaries</h6><h2 id="dashTotalBen" class="fw-extrabold mb-0">0</h2></div></div>
+      <div class="col-md-4 mb-2"><div class="card p-4 bg-success text-white shadow-sm"><h6 id="dashServedLabel">Total Served</h6><h2 id="dashServedToday" class="fw-extrabold mb-0">0</h2></div></div>
+      <div class="col-md-4 mb-2"><div class="card p-4 bg-danger text-white shadow-sm"><h6 id="dashAbsentLabel">Absent (A)</h6><h2 id="dashAbsentToday" class="fw-extrabold mb-0">0</h2></div></div>
     </div>
 
-    <!-- VISUAL GRAPHICAL ANALYTICS -->
+    <!-- CHARTS -->
     <div class="row">
-      <div class="col-md-7 mb-3">
-        <div class="card p-3">
-          <h6 class="fw-bold text-primary">📈 BMI Progress Tracking (Baseline vs Midline vs Endline)</h6>
-          <canvas id="chartBmiProgression" style="max-height: 320px;"></canvas>
+      <div class="col-md-7 mb-4">
+        <div class="card p-4 shadow-sm h-100">
+          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-chart-bar me-2"></i> BMI Progress Tracking (Baseline vs Midline vs Endline)</h6>
+          <canvas id="chartBmiProgression" style="max-height: 340px;"></canvas>
         </div>
       </div>
-      <div class="col-md-5 mb-3">
-        <div class="card p-3">
-          <h6 class="fw-bold text-primary" id="attendanceChartTitle">Feeding Attendance Summary</h6>
-          <canvas id="chartAttendance" style="max-height: 320px;"></canvas>
+      <div class="col-md-5 mb-4">
+        <div class="card p-4 shadow-sm h-100">
+          <h6 class="fw-bold text-primary mb-3" id="attendanceChartTitle"><i class="fa-solid fa-chart-pie me-2"></i> Feeding Attendance Summary</h6>
+          <canvas id="chartAttendance" style="max-height: 340px;"></canvas>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- UNIVERSAL NOTIFICATION MODAL (SUCCESS POP-UPS) -->
+<div class="modal fade" id="notificationModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <div class="mb-3">
+        <i id="modalIcon" class="fa-solid fa-circle-check text-success fa-3x"></i>
+      </div>
+      <h4 id="modalTitle" class="fw-bold text-dark">Success!</h4>
+      <p id="modalMessage" class="text-muted mb-4">Operation completed successfully.</p>
+      <button type="button" class="btn btn-primary fw-bold py-2 px-4 shadow-sm" style="border-radius: 10px;" data-bs-dismiss="modal">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzzptOLasIL2A-3D6DGK_Mr-PQF3i6mSwy8z3N6ml7ZuTeCtpbKzNnFL3nD2Ret3CIj/exec";
+  const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   var userPin = sessionStorage.getItem("sbfp_user_pin") || "";
   var userRole = sessionStorage.getItem("sbfp_user_role") || "";
@@ -258,6 +310,55 @@
   var currentPupilId = null;
   var bmiChart, attChart;
   var dashInterval = null;
+
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch(e) { console.log(e); }
+  }
+
+  function showModalPopup(title, message, isSuccess = true) {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalMessage').innerText = message;
+    document.getElementById('modalIcon').className = isSuccess ? "fa-solid fa-circle-check text-success fa-3x" : "fa-solid fa-circle-exclamation text-danger fa-3x";
+    var myModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+    myModal.show();
+  }
+
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+      });
+    } else {
+      if (document.exitFullscreen) { document.exitFullscreen(); }
+    }
+  }
+
+  function autoComputeBMI(wtId, htId, bmiId) {
+    var wt = parseFloat(document.getElementById(wtId).value);
+    var ht = parseFloat(document.getElementById(htId).value);
+    var bmiField = document.getElementById(bmiId);
+    if (!wt || !ht || ht <= 0) { bmiField.value = "Normal"; return; }
+    
+    var bmiValue = wt / (ht * ht);
+    var status = "Normal";
+    if (bmiValue < 16.0) status = "Severely Wasted";
+    else if (bmiValue < 18.5) status = "Wasted";
+    else if (bmiValue >= 25.0 && bmiValue < 30.0) status = "Overweight";
+    else if (bmiValue >= 30.0) status = "Obese";
+    
+    bmiField.value = status;
+  }
 
   function getLocalTodayDate() {
     var d = new Date();
@@ -291,14 +392,12 @@
         userRole = res.role;
         sessionStorage.setItem("sbfp_user_pin", userPin);
         sessionStorage.setItem("sbfp_user_role", userRole);
-        
         document.getElementById('loginScreen').classList.add('d-none');
         document.getElementById('mainApp').classList.remove('d-none');
         document.getElementById('userRoleBadge').innerText = "Role: " + userRole;
         applyRolePermissions(userRole);
       } else {
-        sessionStorage.removeItem("sbfp_user_pin");
-        sessionStorage.removeItem("sbfp_user_role");
+        sessionStorage.clear();
         userPin = "";
         document.getElementById('loginErrorMsg').innerText = "❌ Incorrect Access PIN!";
       }
@@ -306,27 +405,16 @@
   }
 
   function applyRolePermissions(role) {
-    const navScanner = document.getElementById('nav-scanner');
-    const navAddPupil = document.getElementById('nav-addPupil');
-    const navDashboard = document.getElementById('nav-dashboard');
-
     if (role === "Teacher") {
-      navScanner.classList.remove('d-none');
-      navAddPupil.classList.add('d-none');
-      navDashboard.classList.add('d-none');
       showTab('scanner', document.getElementById('btn-tab-scanner'));
     } else if (role === "Admin") {
-      navScanner.classList.add('d-none');
-      navAddPupil.classList.remove('d-none');
-      navDashboard.classList.remove('d-none');
-      showTab('addPupil', document.getElementById('btn-tab-addPupil'));
+      showTab('dashboard', document.getElementById('btn-tab-dashboard'));
     }
   }
 
   function logout() {
     sessionStorage.clear();
-    userPin = "";
-    userRole = "";
+    userPin = ""; userRole = "";
     stopScanner();
     stopDashboardAutoRefresh();
     document.getElementById('mainApp').classList.add('d-none');
@@ -340,17 +428,9 @@
     document.getElementById('tab-' + tabName).classList.remove('d-none');
     if (element) element.classList.add('active');
 
-    if (tabName === 'scanner') {
-      startScanner();
-      stopDashboardAutoRefresh();
-    } else if (tabName === 'dashboard') {
-      stopScanner();
-      loadDashboard();
-      startDashboardAutoRefresh();
-    } else {
-      stopScanner();
-      stopDashboardAutoRefresh();
-    }
+    if (tabName === 'scanner') { startScanner(); stopDashboardAutoRefresh(); }
+    else if (tabName === 'dashboard') { stopScanner(); loadDashboard(); startDashboardAutoRefresh(); }
+    else { stopScanner(); stopDashboardAutoRefresh(); }
   }
 
   function startDashboardAutoRefresh() {
@@ -383,13 +463,14 @@
   function onScanSuccess(decodedText) {
     if (currentPupilId === decodedText.trim()) return;
     currentPupilId = decodedText.trim();
-    document.getElementById('scanStatusMsg').innerText = "Fetching Learner Info...";
+    playBeep();
+    document.getElementById('scanStatusMsg').innerText = "Recognized! Fetching Learner Info...";
 
     apiCall("getPupilByQR", { pupilId: currentPupilId }).then(res => {
       if (res.success) {
         document.getElementById('pName').innerText = res.pupil.name;
         document.getElementById('pGrade').innerText = res.pupil.grade;
-        document.getElementById('pSection').innerText = res.pupil.section;
+        document.getElementById('pSection').innerText = res.pupil.section || "Magiliw";
         document.getElementById('pId').innerText = res.pupil.id + " / " + res.pupil.lrn;
         document.getElementById('pStatus').innerText = res.pupil.baseBMI;
         document.getElementById('scanResult').classList.remove('d-none');
@@ -403,13 +484,13 @@
 
   function submitAttendance(status) {
     if (!currentPupilId) return;
-    document.getElementById('scanStatusMsg').innerText = "Recording...";
-    
+    document.getElementById('scanStatusMsg').innerText = "Recording attendance...";
     apiCall("recordAttendance", { pupilId: currentPupilId, status: status }).then(res => {
       if (res.success) {
-        document.getElementById('scanStatusMsg').innerText = "✓ Attendance Updated: " + res.name + " (" + status + ")";
+        showModalPopup("Attendance Recorded", `Successfully logged ${res.name} as (${status})`);
         document.getElementById('scanResult').classList.add('d-none');
         currentPupilId = null;
+        document.getElementById('scanStatusMsg').innerText = "";
       }
     });
   }
@@ -419,20 +500,65 @@
     var formData = {};
     new FormData(this).forEach((val, key) => formData[key] = val);
     
-    document.getElementById('addFormMsg').innerText = "Saving learner...";
     apiCall("addBeneficiary", { formData: formData }).then(res => {
       if (res.success) {
-        document.getElementById('addFormMsg').innerHTML = `<div class="alert alert-success">✓ Learner Added! ID: <strong>${res.pupilId}</strong></div>`;
+        showModalPopup("Learner Saved", `Learner successfully added to masterlist!\nGenerated ID: ${res.pupilId}`);
         document.getElementById('beneficiaryForm').reset();
       } else {
-        document.getElementById('addFormMsg').innerHTML = `<div class="alert alert-danger">❌ ${res.message}</div>`;
+        showModalPopup("Error", res.message, false);
       }
     });
   });
 
+  function fetchLearnerForUpdate() {
+    var pupilId = document.getElementById('updateSearchId').value.trim();
+    if (!pupilId) return;
+    apiCall("getPupilByQR", { pupilId: pupilId }).then(res => {
+      if (res.success) {
+        document.getElementById('upNameDisp').innerText = res.pupil.name;
+        document.getElementById('upGradeDisp').innerText = res.pupil.grade;
+        document.getElementById('updateFormContainer').classList.remove('d-none');
+        document.getElementById('updateMsg').innerHTML = "";
+      } else {
+        document.getElementById('updateFormContainer').classList.add('d-none');
+        document.getElementById('updateMsg').innerHTML = `<div class="alert alert-danger">❌ ${res.message}</div>`;
+      }
+    });
+  }
+
+  function submitUpdateLearner(e) {
+    e.preventDefault();
+    var pupilId = document.getElementById('updateSearchId').value.trim();
+    var period = document.getElementById('updatePeriod').value;
+    var periodData = {
+      date: document.getElementById('upDate').value,
+      age: document.getElementById('upAge').value,
+      weight: document.getElementById('upWeight').value,
+      height: document.getElementById('upHeight').value,
+      bmiStatus: document.getElementById('upBMI').value
+    };
+
+    apiCall("updatePeriodData", { pupilId: pupilId, period: period, periodData: periodData }).then(res => {
+      if (res.success) {
+        showModalPopup("Data Updated", "Learner data updated successfully!");
+        document.getElementById('updateLearnerForm').reset();
+        document.getElementById('updateFormContainer').classList.add('d-none');
+        document.getElementById('updateSearchId').value = "";
+      } else {
+        showModalPopup("Update Failed", res.message, false);
+      }
+    });
+  }
+
+  function applyFiltersWithPopup() {
+    loadDashboard();
+    showModalPopup("Filters Applied", "Dashboard analytics filters and section criteria were successfully applied.");
+  }
+
   function resetFilters() {
     var today = getLocalTodayDate();
     document.getElementById('dashGradeFilter').value = "All";
+    document.getElementById('dashSectionFilter').value = "All";
     document.getElementById('dashStartDate').value = today;
     document.getElementById('dashEndDate').value = today;
     loadDashboard();
@@ -440,17 +566,17 @@
 
   function loadDashboard() {
     var grade = document.getElementById('dashGradeFilter').value;
+    var section = document.getElementById('dashSectionFilter').value;
     var startDate = document.getElementById('dashStartDate').value || getLocalTodayDate();
     var endDate = document.getElementById('dashEndDate').value || getLocalTodayDate();
 
-    apiCall("getDashboardData", { grade: grade, startDate: startDate, endDate: endDate }).then(data => {
+    apiCall("getDashboardData", { grade: grade, section: section, startDate: startDate, endDate: endDate }).then(data => {
       if (!data || !data.success) return;
 
       document.getElementById('dashTotalBen').innerText = data.totalBeneficiaries;
       document.getElementById('dashServedToday').innerText = data.totalServed;
       document.getElementById('dashAbsentToday').innerText = data.attendanceCounts["Absent"];
 
-      // 1. BMI Multi-Bar Progress Chart Rendering
       if (bmiChart) bmiChart.destroy();
       var bmiProg = data.bmiProgression;
       bmiChart = new Chart(document.getElementById('chartBmiProgression'), {
@@ -458,39 +584,20 @@
         data: {
           labels: ['Severely Wasted', 'Wasted', 'Normal', 'Overweight', 'Obese'],
           datasets: [
-            {
-              label: 'Baseline',
-              data: [bmiProg.Baseline["Severely Wasted"], bmiProg.Baseline["Wasted"], bmiProg.Baseline["Normal"], bmiProg.Baseline["Overweight"], bmiProg.Baseline["Obese"]],
-              backgroundColor: '#dc3545'
-            },
-            {
-              label: 'Midline',
-              data: [bmiProg.Midline["Severely Wasted"], bmiProg.Midline["Wasted"], bmiProg.Midline["Normal"], bmiProg.Midline["Overweight"], bmiProg.Midline["Obese"]],
-              backgroundColor: '#ffc107'
-            },
-            {
-              label: 'Endline',
-              data: [bmiProg.Endline["Severely Wasted"], bmiProg.Endline["Wasted"], bmiProg.Endline["Normal"], bmiProg.Endline["Overweight"], bmiProg.Endline["Obese"]],
-              backgroundColor: '#198754'
-            }
+            { label: 'Baseline', data: [bmiProg.Baseline["Severely Wasted"], bmiProg.Baseline["Wasted"], bmiProg.Baseline["Normal"], bmiProg.Baseline["Overweight"], bmiProg.Baseline["Obese"]], backgroundColor: '#ef4444' },
+            { label: 'Midline', data: [bmiProg.Midline["Severely Wasted"], bmiProg.Midline["Wasted"], bmiProg.Midline["Normal"], bmiProg.Midline["Overweight"], bmiProg.Midline["Obese"]], backgroundColor: '#f59e0b' },
+            { label: 'Endline', data: [bmiProg.Endline["Severely Wasted"], bmiProg.Endline["Wasted"], bmiProg.Endline["Normal"], bmiProg.Endline["Overweight"], bmiProg.Endline["Obese"]], backgroundColor: '#10b981' }
           ]
         },
-        options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
+        options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
       });
 
-      // 2. Attendance Chart Rendering
       if (attChart) attChart.destroy();
       attChart = new Chart(document.getElementById('chartAttendance'), {
-        type: 'pie',
+        type: 'doughnut',
         data: {
           labels: ['(/) Present', '(A) Absent', '(//) Served Twice'],
-          datasets: [{
-            data: [data.attendanceCounts["Present"], data.attendanceCounts["Absent"], data.attendanceCounts["Served Twice"]],
-            backgroundColor: ['#0d6efd', '#dc3545', '#ffc107']
-          }]
+          datasets: [{ data: [data.attendanceCounts["Present"], data.attendanceCounts["Absent"], data.attendanceCounts["Served Twice"]], backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b'] }]
         },
         options: { responsive: true }
       });
