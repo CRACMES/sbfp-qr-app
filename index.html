@@ -142,13 +142,13 @@
         <div class="row">
           <div class="col-md-3 mb-3">
             <label class="form-label fw-bold small">Grade Level</label>
-            <select class="form-select" name="grade" required>
+            <select class="form-select" id="addGrade" name="grade" onchange="populateSections('addGrade', 'addSection')" required>
               <option value="Kindergarten">Kindergarten</option><option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option><option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option><option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
             </select>
           </div>
           <div class="col-md-3 mb-3">
             <label class="form-label fw-bold small">Section</label>
-            <input type="text" class="form-control" name="section" placeholder="e.g. Magiliw" required>
+            <select class="form-select" id="addSection" name="section" required></select>
           </div>
           <div class="col-md-3 mb-3">
             <label class="form-label fw-bold small">Birthdate</label>
@@ -179,8 +179,8 @@
   <!-- TAB 3: UPDATE LEARNER DATA -->
   <div id="tab-updatePupil" class="tab-content d-none">
     <div class="card p-4">
-      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-pen me-2"></i> Update Learner Nutritional Assessment</h5>
-      <p class="text-muted small">Search learner by LRN or ID, select assessment period, and update metrics with automated BMI computation.</p>
+      <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-pen me-2"></i> Update Learner Masterlist & Nutritional Assessment</h5>
+      <p class="text-muted small">Search learner by LRN or ID to update both their masterlist profile and assessment period metrics.</p>
       
       <div class="row g-3 mb-4">
         <div class="col-md-8">
@@ -201,10 +201,54 @@
       </div>
 
       <div id="updateFormContainer" class="d-none">
-        <div class="alert alert-info border-0 mb-3" style="border-radius: 12px;">
-          <strong>Learner: <span id="upNameDisp">---</span></strong> | Grade: <span id="upGradeDisp">---</span>
-        </div>
         <form id="updateLearnerForm" onsubmit="submitUpdateLearner(event)">
+          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-id-card me-2"></i> Masterlist Information</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold small">LRN (12 Digits)</label>
+              <input type="text" class="form-control" id="upLrn" required>
+            </div>
+            <div class="col-md-8 mb-3">
+              <label class="form-label fw-bold small">Learner Name</label>
+              <input type="text" class="form-control" id="upName" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold small">Complete Address</label>
+              <input type="text" class="form-control" id="upAddress" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">QC Resident?</label>
+              <select class="form-select" id="upQcResident"><option value="YES">YES</option><option value="NO">NO</option></select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">Sex</label>
+              <select class="form-select" id="upSex"><option value="MALE">MALE</option><option value="FEMALE">FEMALE</option></select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">Grade Level</label>
+              <select class="form-select" id="upGrade" onchange="populateSections('upGrade', 'upSection')" required>
+                <option value="Kindergarten">Kindergarten</option><option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option><option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option><option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">Section</label>
+              <select class="form-select" id="upSection" required></select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">Birthdate</label>
+              <input type="date" class="form-control" id="upBirthdate" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-bold small">Dewormed?</label>
+              <select class="form-select" id="upDewormed"><option value="YES">YES</option><option value="NO">NO</option></select>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-primary mt-4 mb-3"><i class="fa-solid fa-weight-scale me-2"></i> Nutritional Assessment Metrics</h6>
           <div class="row">
             <div class="col-md-3 mb-3"><label class="small fw-bold">Date</label><input type="date" class="form-control" id="upDate" required></div>
             <div class="col-md-2 mb-3"><label class="small fw-bold">Age (Yrs/Mos)</label><input type="text" class="form-control" id="upAge" required></div>
@@ -215,7 +259,7 @@
               <input type="text" class="form-control fw-bold text-success bg-light" id="upBMI" readonly required>
             </div>
           </div>
-          <button type="submit" class="btn btn-success w-100 fw-bold py-3 mt-2 shadow-sm" style="border-radius: 12px;"><i class="fa-solid fa-cloud-arrow-up me-2"></i> Update Learner Assessment Data</button>
+          <button type="submit" class="btn btn-success w-100 fw-bold py-3 mt-3 shadow-sm" style="border-radius: 12px;"><i class="fa-solid fa-cloud-arrow-up me-2"></i> Update Complete Learner Record</button>
         </form>
       </div>
       <div id="updateMsg" class="mt-3"></div>
@@ -232,7 +276,7 @@
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
           <label class="form-label small fw-bold">Grade Level</label>
-          <select id="dashGradeFilter" class="form-select form-select-sm">
+          <select id="dashGradeFilter" class="form-select form-select-sm" onchange="populateSections('dashGradeFilter', 'dashSectionFilter', true)">
             <option value="All">All Grade Levels</option>
             <option value="Kindergarten">Kindergarten</option><option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option><option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option><option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
           </select>
@@ -241,9 +285,6 @@
           <label class="form-label small fw-bold">Section</label>
           <select id="dashSectionFilter" class="form-select form-select-sm">
             <option value="All">All Sections</option>
-            <option value="Magiliw">Magiliw</option>
-            <option value="Sampaguita">Sampaguita</option>
-            <option value="Mabini">Mabini</option>
           </select>
         </div>
         <div class="col-md-2">
@@ -304,6 +345,38 @@
 <script>
   // Paste your Google Apps Script Web App URL here
   const API_URL = "https://script.google.com/macros/s/AKfycbzzptOLasIL2A-3D6DGK_Mr-PQF3i6mSwy8z3N6ml7ZuTeCtpbKzNnFL3nD2Ret3CIj/exec";
+
+  const SECTION_MAP = {
+    "Kindergarten": ["Asul", "Berde", "Dilaw", "Kahel", "Lila", "Pula"],
+    "Grade 1": ["Magiliw", "Malikhain", "Masikap", "Matatag", "Matibay"],
+    "Grade 2": ["Anahaw", "Cariñosa", "Narra", "Sampaguita"],
+    "Grade 3": ["Mt. Apo", "Mt. Arayat", "Mt. Banahaw", "Mt. Makiling", "Mt. Pulag"],
+    "Grade 4": ["Dinagyang", "Moriones", "Pahiyas", "Panagbenga"],
+    "Grade 5": ["A. Mabini", "A. Bonifacio", "M. Del Pilar", "J. Rizal"],
+    "Grade 6": ["Aquino", "Duterte", "Marcos"]
+  };
+
+  function populateSections(gradeSelectId, sectionSelectId, includeAllOption = false) {
+    var gradeVal = document.getElementById(gradeSelectId).value;
+    var sectionSelect = document.getElementById(sectionSelectId);
+    sectionSelect.innerHTML = "";
+    
+    if (includeAllOption) {
+      var optAll = document.createElement("option");
+      optAll.value = "All";
+      optAll.textContent = "All Sections";
+      sectionSelect.appendChild(optAll);
+    }
+    
+    if (SECTION_MAP[gradeVal]) {
+      SECTION_MAP[gradeVal].forEach(sec => {
+        var opt = document.createElement("option");
+        opt.value = sec;
+        opt.textContent = sec;
+        sectionSelect.appendChild(opt);
+      });
+    }
+  }
 
   var userPin = sessionStorage.getItem("sbfp_user_pin") || "";
   var userRole = sessionStorage.getItem("sbfp_user_role") || "";
@@ -416,8 +489,11 @@
 
   function applyRolePermissions(role) {
     if (role === "Teacher") {
+      // Hide Dashboard tab for Teachers
+      document.getElementById('nav-dashboard').style.display = 'none';
       showTab('scanner', document.getElementById('btn-tab-scanner'));
     } else if (role === "Admin") {
+      document.getElementById('nav-dashboard').style.display = 'block';
       showTab('dashboard', document.getElementById('btn-tab-dashboard'));
     }
   }
@@ -515,6 +591,7 @@
       if (res.success) {
         showModalPopup("Learner Saved", `Learner successfully added to masterlist!\nGenerated ID: ${res.pupilId}`);
         document.getElementById('beneficiaryForm').reset();
+        populateSections('addGrade', 'addSection');
       } else {
         showModalPopup("Error", res.message, false);
       }
@@ -526,8 +603,20 @@
     if (!pupilId) return;
     apiCall("getPupilByQR", { pupilId: pupilId }).then(res => {
       if (res.success) {
-        document.getElementById('upNameDisp').innerText = res.pupil.name;
-        document.getElementById('upGradeDisp').innerText = res.pupil.grade;
+        var p = res.pupil;
+        document.getElementById('upLrn').value = p.lrn || "";
+        document.getElementById('upName').value = p.name || "";
+        document.getElementById('upAddress').value = p.address || "";
+        document.getElementById('upQcResident').value = p.qcResident || "YES";
+        document.getElementById('upSex').value = p.sex || "MALE";
+        
+        document.getElementById('upGrade').value = p.grade || "Kindergarten";
+        populateSections('upGrade', 'upSection');
+        document.getElementById('upSection').value = p.section || "";
+        
+        document.getElementById('upBirthdate').value = p.birthdate || "";
+        document.getElementById('upDewormed').value = p.dewormed || "YES";
+
         document.getElementById('updateFormContainer').classList.remove('d-none');
         document.getElementById('updateMsg').innerHTML = "";
       } else {
@@ -541,6 +630,19 @@
     e.preventDefault();
     var pupilId = document.getElementById('updateSearchId').value.trim();
     var period = document.getElementById('updatePeriod').value;
+    
+    var formData = {
+      lrn: document.getElementById('upLrn').value,
+      name: document.getElementById('upName').value,
+      address: document.getElementById('upAddress').value,
+      qcResident: document.getElementById('upQcResident').value,
+      sex: document.getElementById('upSex').value,
+      grade: document.getElementById('upGrade').value,
+      section: document.getElementById('upSection').value,
+      birthdate: document.getElementById('upBirthdate').value,
+      dewormed: document.getElementById('upDewormed').value
+    };
+
     var periodData = {
       date: document.getElementById('upDate').value,
       age: document.getElementById('upAge').value,
@@ -549,9 +651,9 @@
       bmiStatus: document.getElementById('upBMI').value
     };
 
-    apiCall("updatePeriodData", { pupilId: pupilId, period: period, periodData: periodData }).then(res => {
+    apiCall("updatePupilFull", { pupilId: pupilId, formData: formData, period: period, periodData: periodData }).then(res => {
       if (res.success) {
-        showModalPopup("Data Updated", "Learner data updated successfully!");
+        showModalPopup("Data Updated", "Learner masterlist and assessment data updated successfully!");
         document.getElementById('updateLearnerForm').reset();
         document.getElementById('updateFormContainer').classList.add('d-none');
         document.getElementById('updateSearchId').value = "";
@@ -569,7 +671,7 @@
   function resetFilters() {
     var today = getLocalTodayDate();
     document.getElementById('dashGradeFilter').value = "All";
-    document.getElementById('dashSectionFilter').value = "All";
+    populateSections('dashGradeFilter', 'dashSectionFilter', true);
     document.getElementById('dashStartDate').value = today;
     document.getElementById('dashEndDate').value = today;
     loadDashboard();
@@ -619,6 +721,12 @@
     var today = getLocalTodayDate();
     document.getElementById('dashStartDate').value = today;
     document.getElementById('dashEndDate').value = today;
+    
+    // Initialize default dropdown sections
+    populateSections('addGrade', 'addSection');
+    populateSections('upGrade', 'upSection');
+    populateSections('dashGradeFilter', 'dashSectionFilter', true);
+
     if (userPin) attemptLogin();
   };
 </script>
